@@ -47,7 +47,7 @@ public class Scanner {
 							i++;
 							beg++;
 							end++;
-						}
+					}
 						//Increment linecount
 						linecount++;
 					}
@@ -56,7 +56,7 @@ public class Scanner {
 					end++;
 					if(stream.inputChars[i+1]=='*')
 						state = FSA_STATES.COMMENT;
-						i = i+1;
+						i++;
 						beg++;
 						end++;
 				}
@@ -65,9 +65,13 @@ public class Scanner {
 			case COMMENT:
 				if(stream.inputChars[i] == '*' && stream.inputChars[i+1] == '/') {
 					state = FSA_STATES.START;
-					end = end + 2;
+					beg+=2;
+					end+=2;
+					i++;
+				} else {
+					beg++;
+					end++;
 				}
-				beg++;
 				break;
 			case DIGIT:
 				break;
