@@ -8,7 +8,7 @@ public class Scanner {
 
 	TokenStream stream;
 	FSA_STATES state;
-	int linecount,beg;
+	int linecount,beg,string_beg;
 	public static enum FSA_STATES{
 		START,
 		DIGIT,
@@ -21,6 +21,7 @@ public class Scanner {
 		this.state = FSA_STATES.START;
 		this.linecount = 1;
 		this.beg = -1;
+		this.string_beg = 1;
 	}
 
 
@@ -34,12 +35,12 @@ public class Scanner {
 				if(i==stream.inputChars.length) {
 					Token t = stream.new Token(EOF,i,i,linecount);
 					stream.tokens.add(t);
-				} else if(Character.isWhitespace(stream.inputChars[i])) {
+				} else if(Character.isWhitespace(lookup(i))) {
 					beg++;
-					if(stream.inputChars[i] == 10) {
+					if(lookup(i) == 10) {
 						//If the input char is LF, increment the linecount 
 						linecount++;
-					} else if (stream.inputChars[i] == 13) {
+					} else if (lookup(i) == 13) {
 						//If the input char is a CR, look ahead and see if you have a LF
 						//If the next char is a LF, increment i by 1
 						if(lookup(i+1) == 10) {
@@ -49,22 +50,27 @@ public class Scanner {
 						//Increment linecount
 						linecount++;
 					}
-				} else if(stream.inputChars[i] == '/') {
+				} else if(lookup(i) == '/') {
 					beg++;
 					if(stream.inputChars.length != i+1 && lookup(i+1)=='*') {
 						state = FSA_STATES.COMMENT;
 						i++;
 						beg++;
 					} else {
-						Token t = stream.new Token(DIV,i,i,linecount);
+						Token t = stream.new Token(DIV,i,i+1,linecount);
 						stream.tokens.add(t);
 					}
-				} else if(Character.isDigit(stream.inputChars[i])) {
-					state = FSA_STATES.DIGIT;
-					beg++;
-				} else if(Character.isJavaIdentifierStart(stream.inputChars[i])) {
+				} else if(Character.isDigit(lookup(i))) {
+					if(stream.inputChars[i]=='0') {
+						Token t = stream.new Token(INT_LIT, i, i+1, linecount);
+						stream.tokens.add(t);
+					} else {
+						state = FSA_STATES.DIGIT;
+						beg=i;
+					}
+				} else if(Character.isJavaIdentifierStart(lookup(i))) {
 					state = FSA_STATES.IDENT;
-					beg++;
+					beg=i;
 				} else if(isSeparator(stream.inputChars[i])) {
 					Kind k = getSeparator(stream.inputChars[i]);
 					if(k == ILLEGAL_CHAR){
@@ -79,7 +85,7 @@ public class Scanner {
 							beg=beg+1;
 							continue;
 						} else {
-							Token t = stream.new Token(k,i,i+2,linecount);
+							Token t = stream.new Token(k,i,i+1,linecount);
 							stream.tokens.add(t);
 						}
 					} else {
@@ -149,6 +155,7 @@ public class Scanner {
 					stream.tokens.add(t);
 				} else if(lookup(i)=='"') {
 					beg=i;
+					string_beg = linecount;
 					state = FSA_STATES.STRING_LIT;
 				} else {
 					Token t = stream.new Token(ILLEGAL_CHAR, i, i+1, linecount);
@@ -160,15 +167,35 @@ public class Scanner {
 				
 			case COMMENT:
 				if(i==stream.inputChars.length) {
-					Token t1 = stream.new Token(UNTERMINATED_COMMENT, beg-2, i, linecount);
+					if(beg==0){
+						Token t1 = stream.new Token(UNTERMINATED_COMMENT, beg, i, linecount);
+						stream.tokens.add(t1);
+					} else {
+						Token t1 = stream.new Token(UNTERMINATED_COMMENT, beg-2, i, linecount);
+						stream.tokens.add(t1);
+					}
 					Token t2 = stream.new Token(EOF,i,i,linecount);
-					stream.tokens.add(t1);
 					stream.tokens.add(t2);
-				} else if(stream.inputChars[i] == '*' && lookup(i+1) == '/') {
+				} else if(lookup(i) == '*' && lookup(i+1) == '/') {
 					state = FSA_STATES.START;
 					beg+=2;
 					i++;
-				} else {
+				} else if(Character.isWhitespace(stream.inputChars[i])){
+					if(lookup(i) == 10) {
+						//If the input char is LF, increment the linecount 
+						linecount++;
+					} else if (lookup(i) == 13) {
+						//If the input char is a CR, look ahead and see if you have a LF
+						//If the next char is a LF, increment i by 1
+						if(lookup(i+1) == 10) {
+							i++;
+							beg++;
+						}
+						//Increment linecount
+						linecount++;
+					}
+				}
+				else {
 					beg++;
 				}
 				break;
@@ -178,24 +205,46 @@ public class Scanner {
 					Token t2 = stream.new Token(EOF,i,i,linecount);
 					stream.tokens.add(t);
 					stream.tokens.add(t2);
-				}else if(!Character.isDigit(stream.inputChars[i])) {
+				}else if(!Character.isDigit(lookup(i))) {
 					Token t = stream.new Token(INT_LIT,beg,i,linecount);
 					beg=i;
 					stream.tokens.add(t);
 					state = FSA_STATES.START;
-					if(Character.isJavaIdentifierStart(stream.inputChars[i])) {
+					
+					if(Character.isWhitespace(stream.inputChars[i])) {
+						if(Character.isWhitespace(lookup(i))) {
+							beg++;
+							if(lookup(i) == 10) {
+								//If the input char is LF, increment the linecount 
+								linecount++;
+							} else if (lookup(i) == 13) {
+								//If the input char is a CR, look ahead and see if you have a LF
+								//If the next char is a LF, increment i by 1
+								if(lookup(i+1) == 10) {
+									i++;
+									beg++;
+							}
+								//Increment linecount
+								linecount++;
+							}
+						}
+					} else if(Character.isJavaIdentifierStart(lookup(i))) {
 						state = FSA_STATES.IDENT;
-					} else if(stream.inputChars[i] == '/') {
+					} else if(lookup(i) == '/') {
 						beg++;
 						if(stream.inputChars.length != i+1 && lookup(i+1)=='*') {
 							state = FSA_STATES.COMMENT;
 							i++;
 							beg++;
 						} else {
-							Token t1 = stream.new Token(DIV,i,i,linecount);
+							Token t1 = stream.new Token(DIV,i,i+1,linecount);
 							stream.tokens.add(t1);
 						}
-					}else if(isSeparator(stream.inputChars[i])) {
+					} else if(lookup(i)=='"') {
+						beg=i;
+						string_beg = linecount;
+						state = FSA_STATES.STRING_LIT;
+					} else if(isSeparator(stream.inputChars[i])) {
 						Kind k = getSeparator(stream.inputChars[i]);
 						if(k == ILLEGAL_CHAR){
 							System.out.println("There is a bug. Fix it!!");
@@ -209,7 +258,7 @@ public class Scanner {
 								beg=beg+1;
 								continue;
 							} else {
-								Token t1 = stream.new Token(k,i,i+2,linecount);
+								Token t1 = stream.new Token(k,i,i+1,linecount);
 								stream.tokens.add(t1);
 							}
 						} else {
@@ -277,7 +326,11 @@ public class Scanner {
 						}
 						Token t1 = stream.new Token(k, i, i+1, linecount);
 						stream.tokens.add(t1);
-					} 
+					} else {
+						Token t1 = stream.new Token(ILLEGAL_CHAR, i, i+1, linecount);
+						stream.tokens.add(t1);
+						beg++;
+					}
 				}
 				break;
 			case IDENT:
@@ -286,18 +339,156 @@ public class Scanner {
 					Token t2 = stream.new Token(EOF,i,i,linecount);
 					stream.tokens.add(t1);
 					stream.tokens.add(t2);
-				} else if(!Character.isJavaIdentifierPart(stream.inputChars[i])){
+				} else if(!Character.isJavaIdentifierPart(lookup(i))){
 					Token t = stream.new Token(getKeywordLit(String.valueOf(stream.inputChars, beg, i - beg)), beg, i, linecount);
 					beg=i;
 					stream.tokens.add(t);
 					state = FSA_STATES.START;
+					
+					if(Character.isWhitespace(stream.inputChars[i])) {
+						if(Character.isWhitespace(lookup(i))) {
+							beg++;
+							if(lookup(i) == 10) {
+								//If the input char is LF, increment the linecount 
+								linecount++;
+							} else if (lookup(i) == 13) {
+								//If the input char is a CR, look ahead and see if you have a LF
+								//If the next char is a LF, increment i by 1
+								if(lookup(i+1) == 10) {
+									i++;
+									beg++;
+							}
+								//Increment linecount
+								linecount++;
+							}
+						}
+					} else if(lookup(i) == '/') {
+						beg++;
+						if(stream.inputChars.length != i+1 && lookup(i+1)=='*') {
+							state = FSA_STATES.COMMENT;
+							i++;
+							beg++;
+						} else {
+							Token t1 = stream.new Token(DIV,i,i+1,linecount);
+							stream.tokens.add(t1);
+						}
+					} else if(lookup(i)=='"') {
+						beg=i;
+						string_beg = linecount;
+						state = FSA_STATES.STRING_LIT;
+					} else if(isSeparator(stream.inputChars[i])) {
+						Kind k = getSeparator(stream.inputChars[i]);
+						if(k == ILLEGAL_CHAR){
+							System.out.println("There is a bug. Fix it!!");
+							System.out.println(Thread.currentThread().getStackTrace());
+							System.exit(1);
+						} else if(k == DOT) {
+							if(lookup(i+1)=='.') {
+								Token t1 = stream.new Token(RANGE, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							} else {
+								Token t1 = stream.new Token(k,i,i+1,linecount);
+								stream.tokens.add(t1);
+							}
+						} else {
+							Token t1 = stream.new Token(k,i,i+1,linecount);
+							stream.tokens.add(t1);
+						}
+					} else if(isOperator(stream.inputChars[i])){
+						Kind k = getOperator(stream.inputChars[i]);
+						if(k==ASSIGN) {
+							if(lookup(i+1)=='='){
+								Token t1 = stream.new Token(EQUAL, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							}
+						} else if(k==NOT){
+							if(lookup(i+1)=='='){
+								Token t1 = stream.new Token(NOTEQUAL, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							}
+						} else if (k==LT) {
+							if(lookup(i+1)=='='){
+								Token t1 = stream.new Token(LE, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							} else if(lookup(i+1)=='<'){
+								Token t1 = stream.new Token(LSHIFT, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							}
+						} else if(k==GT){
+							if(lookup(i+1)=='='){
+								Token t1 = stream.new Token(GE, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							} else if(lookup(i+1)=='>'){
+								Token t1 = stream.new Token(RSHIFT, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							}
+						} else if(k == MINUS){
+							if(lookup(i+1)=='>'){
+								Token t1 = stream.new Token(ARROW, i, i+2, linecount);
+								stream.tokens.add(t1);
+								i++;
+								beg=beg+1;
+								continue;
+							}
+						} else if (k==ILLEGAL_CHAR) {
+							System.out.println("There is a bug. Fix it!");
+							System.out.println(Thread.currentThread().getStackTrace());
+							System.exit(1);
+						}
+						Token t1 = stream.new Token(k, i, i+1, linecount);
+						stream.tokens.add(t1);
+					} else {
+						Token t1 = stream.new Token(ILLEGAL_CHAR, i, i+1, linecount);
+						stream.tokens.add(t1);
+						beg++;
+					}
 				}
 				break;
 			case STRING_LIT:
-				if(lookup(i) == '"' && lookup(i-1)!='\\'){
-					Token t1 = stream.new Token(STRING_LIT,beg,i+1,linecount);
+				if(i==stream.inputChars.length) {
+					Token t1 = stream.new Token(UNTERMINATED_STRING, beg, i, string_beg);
+					Token t2 = stream.new Token(EOF,i,i,linecount);
+					stream.tokens.add(t1);
+					stream.tokens.add(t2);
+				} else if(lookup(i) == '"' && lookup(i-1)!='\\'){
+					Token t1 = stream.new Token(STRING_LIT,beg,i+1,string_beg);
 					stream.tokens.add(t1);
 					state = FSA_STATES.START;
+				}  else if(Character.isWhitespace(stream.inputChars[i])){
+					if(lookup(i) == 10) {
+						//If the input char is LF, increment the linecount 
+						linecount++;
+					} else if (lookup(i) == 13) {
+						//If the input char is a CR, look ahead and see if you have a LF
+						//If the next char is a LF, increment i by 1
+						if(lookup(i+1) == 10) {
+							i++;
+							beg++;
+						}
+						//Increment linecount
+						linecount++;
+					}
 				}
 				break;
 			default:
