@@ -200,7 +200,6 @@ public class Scanner {
 						// If the next char is a LF, increment i by 1
 						if (lookup(i + 1) == 10) {
 							i++;
-							beg++;
 						}
 						// Increment linecount
 						linecount++;
