@@ -97,7 +97,7 @@ public class TestScanner {
 		assertEquals(SEMICOLON, stream.nextToken().kind);
 		Token t = stream.nextToken();
 		assertEquals(SEMICOLON, t.kind);
-		assertEquals(4,t.getLineNumber());
+		assertEquals(4, t.getLineNumber());
 	}
 
 	@Test
@@ -381,9 +381,9 @@ public class TestScanner {
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
-	public void singleSlash(){
+	public void singleSlash() {
 		System.out.println("singleSlash");
 		String input = "/";
 		System.out.println(input);
@@ -393,7 +393,6 @@ public class TestScanner {
 		System.out.println(stream);
 	}
 
-	
 	@Test
 	public void illegalChars() {
 		System.out.println("illegalchars");
@@ -403,13 +402,17 @@ public class TestScanner {
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();
 		System.out.println(stream);
-		Kind[] expectedKinds = { ILLEGAL_CHAR, IDENT, ILLEGAL_CHAR, INT_LIT, ILLEGAL_CHAR,
-				ARROW, ILLEGAL_CHAR, EOF };
-		String[] expectedTexts = { "#", "abc", "#", "123", "#", "->", "#", "" }; // need empty string for eof
+		Kind[] expectedKinds = { ILLEGAL_CHAR, IDENT, ILLEGAL_CHAR, INT_LIT,
+				ILLEGAL_CHAR, ARROW, ILLEGAL_CHAR, EOF };
+		String[] expectedTexts = { "#", "abc", "#", "123", "#", "->", "#", "" }; // need
+																					// empty
+																					// string
+																					// for
+																					// eof
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void digits() {
 		System.out.println("digits");
@@ -419,12 +422,16 @@ public class TestScanner {
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();
 		System.out.println(stream);
-		Kind[] expectedKinds = { INT_LIT, INT_LIT, INT_LIT, INT_LIT, INT_LIT, EOF };
-		String[] expectedTexts = { "1","2", "3", "0", "123", "" }; // need empty string for eof
+		Kind[] expectedKinds = { INT_LIT, INT_LIT, INT_LIT, INT_LIT, INT_LIT,
+				EOF };
+		String[] expectedTexts = { "1", "2", "3", "0", "123", "" }; // need
+																	// empty
+																	// string
+																	// for eof
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void unterminatedStrings() {
 		System.out.println("Unterminated Strings");
@@ -435,7 +442,8 @@ public class TestScanner {
 		scanner.scan();
 		System.out.println(stream);
 		Kind[] expectedKinds = { UNTERMINATED_STRING, EOF };
-		String[] expectedTexts = { "\" Hello", "" }; // need empty string for eof
+		String[] expectedTexts = { "\" Hello", "" }; // need empty string for
+														// eof
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
@@ -454,7 +462,7 @@ public class TestScanner {
 		assertSame(stream.tokens.get(0).lineNumber, 1);
 		assertSame(stream.tokens.get(1).lineNumber, 2);
 	}
-	
+
 	@Test
 	public void stateswitching() {
 		System.out.println("stateswitching");
@@ -470,7 +478,6 @@ public class TestScanner {
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
 
-	
 	@Test
 	public void operators() {
 		System.out.println("operators");
@@ -485,7 +492,7 @@ public class TestScanner {
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void operators2() {
 		System.out.println("operators2");
@@ -496,11 +503,11 @@ public class TestScanner {
 		scanner.scan();
 		System.out.println(stream);
 		Kind[] expectedKinds = { EQUAL, ASSIGN, MINUS, ARROW, EOF };
-		String[] expectedTexts = { "==", "=", "-", "->","" };
+		String[] expectedTexts = { "==", "=", "-", "->", "" };
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void operators3() {
 		System.out.println("operators3");
@@ -511,11 +518,11 @@ public class TestScanner {
 		scanner.scan();
 		System.out.println(stream);
 		Kind[] expectedKinds = { NOT, NOTEQUAL, ASSIGN, EOF };
-		String[] expectedTexts = { "!", "!=", "=","" };
+		String[] expectedTexts = { "!", "!=", "=", "" };
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void operators4() {
 		System.out.println("operators4");
@@ -530,7 +537,7 @@ public class TestScanner {
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void operators5() {
 		System.out.println("operators5");
@@ -540,12 +547,13 @@ public class TestScanner {
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();
 		System.out.println(stream);
-		Kind[] expectedKinds = { BAR, AND, PLUS, MINUS, TIMES, DIV, MOD, AT, EOF };
+		Kind[] expectedKinds = { BAR, AND, PLUS, MINUS, TIMES, DIV, MOD, AT,
+				EOF };
 		String[] expectedTexts = { "|", "&", "+", "-", "*", "/", "%", "@", "" };
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void separators() {
 		System.out.println("Separators");
@@ -555,13 +563,14 @@ public class TestScanner {
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();
 		System.out.println(stream);
-		Kind[] expectedKinds = { SEMICOLON, COMMA, LPAREN, RPAREN, LCURLY, RCURLY, LSQUARE, RSQUARE,
-				COLON, QUESTION, EOF };
-		String[] expectedTexts = { ";", ",", "(", ")", "{", "}", "[", "]", ":", "?", "" };
+		Kind[] expectedKinds = { SEMICOLON, COMMA, LPAREN, RPAREN, LCURLY,
+				RCURLY, LSQUARE, RSQUARE, COLON, QUESTION, EOF };
+		String[] expectedTexts = { ";", ",", "(", ")", "{", "}", "[", "]", ":",
+				"?", "" };
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void keywords1() {
 		System.out.println("keywords1");
@@ -586,14 +595,16 @@ public class TestScanner {
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();
 		System.out.println(stream);
-		Kind[] expectedKinds = { KW_INT, KW_STRING, KW_BOOLEAN, KW_IMPORT, KW_CLASS, KW_DEF,
-				KW_WHILE, KW_IF, KW_ELSE, KW_RETURN, KW_PRINT, BL_TRUE, BL_FALSE, EOF };
-		String[] expectedTexts = { "int", "string", "boolean", "import", "class",
-				"def", "while",  "if" ,"else", "return","print", "true",  "false", "" };
+		Kind[] expectedKinds = { KW_INT, KW_STRING, KW_BOOLEAN, KW_IMPORT,
+				KW_CLASS, KW_DEF, KW_WHILE, KW_IF, KW_ELSE, KW_RETURN,
+				KW_PRINT, BL_TRUE, BL_FALSE, EOF };
+		String[] expectedTexts = { "int", "string", "boolean", "import",
+				"class", "def", "while", "if", "else", "return", "print",
+				"true", "false", "" };
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	// Creates an array containing the kinds of the tokens in the token list
 	Kind[] makeKindArray(TokenStream stream) {
 		Kind[] kinds = new Kind[stream.tokens.size()];
@@ -601,7 +612,7 @@ public class TestScanner {
 			kinds[i] = stream.tokens.get(i).kind;
 		}
 		return kinds;
-		
+
 	}
 
 	// Creates an array containing the texts of the tokens in the token list
@@ -613,5 +624,4 @@ public class TestScanner {
 		return kinds;
 	}
 
-	
 }
