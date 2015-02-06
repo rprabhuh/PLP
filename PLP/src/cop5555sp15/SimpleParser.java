@@ -157,6 +157,16 @@ public class SimpleParser {
 
 	private void ImportList() throws SyntaxException {
 		//TODO  Fill this in
+		while(!isKind(KW_CLASS)) {
+			match(KW_IMPORT);
+			match(IDENT);
+			while(!isKind(SEMICOLON)) {
+				match(DOT);
+				match(IDENT);
+			}
+			match(SEMICOLON);
+		}
+
 	}
 
 	private void Block() throws SyntaxException {
