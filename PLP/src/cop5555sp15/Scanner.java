@@ -584,6 +584,12 @@ public class Scanner {
 			return BL_FALSE;
 		case "null":
 			return NL_NULL;
+		case "size":
+			return KW_SIZE;
+		case "key":
+			return KW_KEY;
+		case "value":
+			return KW_VALUE;
 		default:
 			return IDENT;
 		}

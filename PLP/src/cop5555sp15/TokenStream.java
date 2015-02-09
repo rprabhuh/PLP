@@ -15,8 +15,10 @@ import java.util.ArrayList;
  */
 public class TokenStream {
 	char[] inputChars; // input
-	public final ArrayList<Token> tokens = new ArrayList<Token>(); // holds tokens after scan
-																	
+	public final ArrayList<Token> tokens = new ArrayList<Token>(); // holds
+																	// tokens
+																	// after
+																	// scan
 
 	/* provide input in char array */
 	public TokenStream(char[] inputChars) {
@@ -73,11 +75,10 @@ public class TokenStream {
 		return sb.toString();
 	}
 
-
 	public static enum Kind {
 		IDENT,
 		/* reserved words */
-		KW_INT, KW_STRING, KW_BOOLEAN, KW_IMPORT, KW_CLASS, KW_DEF, KW_WHILE, KW_IF, KW_ELSE, KW_RETURN, KW_PRINT,
+		KW_INT, KW_STRING, KW_BOOLEAN, KW_IMPORT, KW_CLASS, KW_DEF, KW_WHILE, KW_IF, KW_ELSE, KW_RETURN, KW_PRINT, KW_SIZE, KW_KEY, KW_VALUE,
 		/* boolean literals */
 		BL_TRUE, BL_FALSE,
 		/* null literal */
@@ -118,9 +119,9 @@ public class TokenStream {
 		/* end of file */
 		EOF,
 		/* error tokens */
-		ILLEGAL_CHAR,         //a character that cannot appear in that context
-		UNTERMINATED_STRING,  //end of input is reached before the closing "
-		UNTERMINATED_COMMENT  //end of input is reached before the closing */
+		ILLEGAL_CHAR, // a character that cannot appear in that context
+		UNTERMINATED_STRING, // end of input is reached before the closing "
+		UNTERMINATED_COMMENT // end of input is reached before the closing */
 	}
 
 	/*
@@ -160,9 +161,10 @@ public class TokenStream {
 			return lineNumber;
 		}
 
-		/**This method handles the escape characters in String literals.  The
-		 * getText method returns the string from the token's characters.  This means that
-		 * the Scanner can ignore escape characters.
+		/**
+		 * This method handles the escape characters in String literals. The
+		 * getText method returns the string from the token's characters. This
+		 * means that the Scanner can ignore escape characters.
 		 * 
 		 * @return
 		 */
@@ -173,26 +175,26 @@ public class TokenStream {
 			}
 			if (kind == Kind.STRING_LIT) {
 				StringBuilder sb = new StringBuilder();
-				for (int i = beg+1; i < end-1; ++i) {
+				for (int i = beg + 1; i < end - 1; ++i) {
 					char ch = inputChars[i];
 					if (ch == '\\') {
-						char nextChar = inputChars[i+1];
+						char nextChar = inputChars[i + 1];
 						if (nextChar == '"') {
 							sb.append('"');
 							i++;
-						} else if (nextChar == 'n')  {
+						} else if (nextChar == 'n') {
 							sb.append('\n');
 							i++;
 						} else if (nextChar == 'r') {
 							sb.append('\r');
 							i++;
 						} else if (nextChar == '\\') {
-								sb.append('\\');
-								i++;
+							sb.append('\\');
+							i++;
 						}
 					} else {
 						sb.append(ch);
-					}	
+					}
 				}
 				return sb.toString();
 			}

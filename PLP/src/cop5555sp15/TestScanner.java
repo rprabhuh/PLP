@@ -604,6 +604,21 @@ public class TestScanner {
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
+	
+	@Test
+	public void keywords3() {
+		System.out.println("keywords2");
+		String input = "size key value";
+		System.out.println(input);
+		TokenStream stream = new TokenStream(input);
+		Scanner scanner = new Scanner(stream);
+		scanner.scan();
+		System.out.println(stream);
+		Kind[] expectedKinds = { KW_SIZE, KW_KEY, KW_VALUE, EOF };
+		String[] expectedTexts = { "size", "key", "value", "" };
+		assertArrayEquals(expectedKinds, makeKindArray(stream));
+		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
+	}
 
 	// Creates an array containing the kinds of the tokens in the token list
 	Kind[] makeKindArray(TokenStream stream) {

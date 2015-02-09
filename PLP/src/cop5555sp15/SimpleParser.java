@@ -135,13 +135,12 @@ public class SimpleParser {
 		return false;
 	}
 
-	//This is a convenient way to represent fixed sets of
-	//token kinds.  You can pass these to isKind.
+	// This is a convenient way to represent fixed sets of
+	// token kinds. You can pass these to isKind.
 	static final Kind[] REL_OPS = { BAR, AND, EQUAL, NOTEQUAL, LT, GT, LE, GE };
 	static final Kind[] WEAK_OPS = { PLUS, MINUS };
 	static final Kind[] STRONG_OPS = { TIMES, DIV };
 	static final Kind[] VERY_STRONG_OPS = { LSHIFT, RSHIFT };
-
 
 	public void parse() throws SyntaxException {
 		Program();
@@ -156,11 +155,11 @@ public class SimpleParser {
 	}
 
 	private void ImportList() throws SyntaxException {
-		//TODO  Fill this in
-		while(!isKind(KW_CLASS)) {
+		// TODO Fill this in
+		while (!isKind(KW_CLASS)) {
 			match(KW_IMPORT);
 			match(IDENT);
-			while(!isKind(SEMICOLON)) {
+			while (!isKind(SEMICOLON)) {
 				match(DOT);
 				match(IDENT);
 			}
@@ -171,10 +170,109 @@ public class SimpleParser {
 
 	private void Block() throws SyntaxException {
 		match(LCURLY);
-		//TODO  Fill this in
+		if(isKind(RCURLY)) {
+			match(RCURLY);
+			return;
+		}
+		if (isKind(KW_DEF)) {
+			Declaration();
+		} else {
+			throw new SyntaxException(t, "expected one of " + IDENT + "or"
+					+ KW_DEF);
+		}
 		match(RCURLY);
 	}
 
+	private void Declaration() throws SyntaxException {
+		match(KW_DEF);
+		if (isKind(IDENT)) {
+			match(IDENT);
+			if (isKind(COLON)||isKind(SEMICOLON)) {
+				varDec();
+			} else if (isKind(ASSIGN)) {
+				closureDec();
+			} else {
+				throw new SyntaxException(t, "expected one of  " + COLON + "or"
+						+ ASSIGN);
+			}
+		} else {
+			throw new SyntaxException(t, "expected " + IDENT);
+		}
+	}
 
+	private void varDec() throws SyntaxException {
+			if(isKind(SEMICOLON)){
+				match(SEMICOLON);
+			} else if(isKind(COLON)){
+				Type();
+			} else {
+				throw new SyntaxException(t, "expected one of  " + COLON + "or"
+						+ SEMICOLON);
+			}
+	}
+
+	
+	private void Type() throws SyntaxException {
+		if(isKind(KW_INT)) {
+			match(KW_INT);
+		} else if (isKind(KW_STRING)){
+			match(KW_STRING);
+		} else if (isKind(KW_BOOLEAN)){
+			match(KW_BOOLEAN);
+		} else if(isKind(AT)) {
+			match(AT);
+			if(isKind(LSQUARE)){
+				match(LSQUARE);
+				Type();
+				match(RSQUARE);
+			} else if(isKind(AT)){
+				match(LSQUARE);
+				SimpleType();
+				match(COLON);
+				Type();
+				match(RSQUARE);
+			} else {
+				throw new SyntaxException(t, "expected one of  " + LSQUARE+ "or"
+						+ AT);
+			}
+		} else {
+			throw new SyntaxException(t, "expected one of  SimpleType, List or KeyValue");
+		}
+	}
+	
+	private void SimpleType() throws SyntaxException {
+		if(isKind(KW_INT)) {
+			consume();
+		} else if (isKind(KW_STRING)){
+			consume();
+		} else if (isKind(KW_BOOLEAN)){
+			consume();
+		} else {
+			throw new SyntaxException(t, "expected one of  " + KW_INT+ "or"
+					+ "or" + KW_BOOLEAN +"or" +KW_STRING);
+		}
+	}
+
+	private void closureDec() throws SyntaxException {
+		match(ASSIGN);
+		Closure();
+	}
+	
+	private void Closure() throws SyntaxException {
+		match(LCURLY);
+		formalArgList();
+		match(ARROW);
+		statement();
+		match(RCURLY);
+	}
+	
+	private void statement() throws SyntaxException{
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void formalArgList() throws SyntaxException{
+		
+	}
 
 }
