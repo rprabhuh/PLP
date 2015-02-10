@@ -170,7 +170,7 @@ public class SimpleParser {
 
 	private void Block() throws SyntaxException {
 		match(LCURLY);
-		if(isKind(RCURLY)) {
+		if (isKind(RCURLY)) {
 			match(RCURLY);
 			return;
 		}
@@ -187,7 +187,7 @@ public class SimpleParser {
 		match(KW_DEF);
 		if (isKind(IDENT)) {
 			match(IDENT);
-			if (isKind(COLON)||isKind(SEMICOLON)) {
+			if (isKind(COLON) || isKind(SEMICOLON)) {
 				varDec();
 			} else if (isKind(ASSIGN)) {
 				closureDec();
@@ -201,63 +201,71 @@ public class SimpleParser {
 	}
 
 	private void varDec() throws SyntaxException {
-			if(isKind(SEMICOLON)){
-				match(SEMICOLON);
-			} else if(isKind(COLON)){
-				Type();
-			} else {
-				throw new SyntaxException(t, "expected one of  " + COLON + "or"
-						+ SEMICOLON);
-			}
+		if (isKind(SEMICOLON)) {
+			match(SEMICOLON);
+		} else if (isKind(COLON)) {
+			Type();
+		} else {
+			throw new SyntaxException(t, "expected one of  " + COLON + "or"
+					+ SEMICOLON);
+		}
 	}
 
-	
 	private void Type() throws SyntaxException {
-		if(isKind(KW_INT)) {
+		if (isKind(KW_INT)) {
 			match(KW_INT);
-		} else if (isKind(KW_STRING)){
+		} else if (isKind(KW_STRING)) {
 			match(KW_STRING);
-		} else if (isKind(KW_BOOLEAN)){
+		} else if (isKind(KW_BOOLEAN)) {
 			match(KW_BOOLEAN);
-		} else if(isKind(AT)) {
+		} else if (isKind(AT)) {
 			match(AT);
-			if(isKind(LSQUARE)){
+			if (isKind(LSQUARE)) {
 				match(LSQUARE);
 				Type();
 				match(RSQUARE);
-			} else if(isKind(AT)){
+			} else if (isKind(AT)) {
 				match(LSQUARE);
 				SimpleType();
 				match(COLON);
 				Type();
 				match(RSQUARE);
 			} else {
-				throw new SyntaxException(t, "expected one of  " + LSQUARE+ "or"
-						+ AT);
+				throw new SyntaxException(t, "expected one of  " + LSQUARE
+						+ "or" + AT);
 			}
 		} else {
-			throw new SyntaxException(t, "expected one of  SimpleType, List or KeyValue");
-		}
-	}
-	
-	private void SimpleType() throws SyntaxException {
-		if(isKind(KW_INT)) {
-			consume();
-		} else if (isKind(KW_STRING)){
-			consume();
-		} else if (isKind(KW_BOOLEAN)){
-			consume();
-		} else {
-			throw new SyntaxException(t, "expected one of  " + KW_INT+ "or"
-					+ "or" + KW_BOOLEAN +"or" +KW_STRING);
+			throw new SyntaxException(t,
+					"expected one of  SimpleType, List or KeyValue");
 		}
 	}
 
+	private void SimpleType() throws SyntaxException {
+		if (isKind(KW_INT)) {
+			consume();
+		} else if (isKind(KW_STRING)) {
+			consume();
+		} else if (isKind(KW_BOOLEAN)) {
+			consume();
+		} else {
+			throw new SyntaxException(t, "expected one of  " + KW_INT + "or"
+					+ "or" + KW_BOOLEAN + "or" + KW_STRING);
+		}
+	}
+
+	private void keyValueType() throws SyntaxException{
+		
+	}
+	
+	private void listType() throws SyntaxException {
+		
+	}
+	
 	private void closureDec() throws SyntaxException {
 		match(ASSIGN);
 		Closure();
 	}
-	
+
 	private void Closure() throws SyntaxException {
 		match(LCURLY);
 		formalArgList();
@@ -265,14 +273,153 @@ public class SimpleParser {
 		statement();
 		match(RCURLY);
 	}
+
+	private void formalArgList() throws SyntaxException {
+		while (!isKind(ARROW)) {
+			varDec();
+			while (isKind(COMMA)) {
+				match(COMMA);
+				varDec();
+			}
+		}// TODO Auto-generated method stub
+	}
+
+	private void statement() throws SyntaxException {
+		if (isKind(IDENT)) {
+			LVALUE();
+			match(ASSIGN);
+			Expression();
+		} else if (isKind(KW_PRINT)) {
+			match(KW_PRINT);
+			Expression();
+		} else if (isKind(KW_WHILE)) {
+			match(KW_WHILE);
+			if (isKind(TIMES)) {
+				match(TIMES);
+				match(LPAREN);
+				Expression();
+				if (isKind(RANGE)) {
+					match(RANGE);
+					Expression();
+				}
+				match(RPAREN);
+			} else {
+				match(LPAREN);
+				Expression();
+				match(RPAREN);
+				Block();
+			}
+		} else if (isKind(KW_IF)) {
+			match(LPAREN);
+			Expression();
+			match(RPAREN);
+			Block();
+			if (isKind(KW_ELSE)) {
+				match(KW_ELSE);
+				Block();
+			}
+		} else if (isKind(MOD)) {
+			match(MOD);
+			Expression();
+		} else if (isKind(KW_RETURN)) {
+			match(KW_RETURN);
+			Expression();
+		}
+
+	}
+
+	private void closureEvalExpression() throws SyntaxException {
+		match(IDENT);
+		match(LPAREN);
+		expressionList();
+		match(RPAREN);
+	}
 	
-	private void statement() throws SyntaxException{
-		// TODO Auto-generated method stub
-		
+	private void LVALUE() throws SyntaxException {
+		match(IDENT);
+		if (isKind(LSQUARE)) {
+			match(LSQUARE);
+			Expression();
+			match(RSQUARE);
+		}
+	}
+	
+	private void list() throws SyntaxException {
+		match(AT);
+		match(LSQUARE);
+		expressionList();
+		match(RSQUARE);
 	}
 
-	private void formalArgList() throws SyntaxException{
-		
+	private void expressionList() throws SyntaxException {
+		Expression();
+		while (isKind(COMMA)) {
+			match(COMMA);
+			Expression();
+		}
 	}
 
+	private void keyValueExpression() throws SyntaxException {
+		Expression();
+		match(COLON);
+		Expression();
+	}
+
+	private void keyValueList() throws SyntaxException {
+		keyValueExpression();
+		while(isKind(COMMA)){
+			match(COMMA);
+			keyValueExpression();
+		}
+	}
+	
+	private void mapList() throws SyntaxException {
+		match(AT);
+		match(AT);
+		match(LSQUARE);
+		keyValueList();
+		match(RSQUARE);
+	}
+
+	private void rangeExpression() throws SyntaxException {
+		Expression();
+		match(RANGE);
+		Expression();
+	}
+	
+	private void Expression() throws SyntaxException {
+
+	}
+
+	private void Term() throws SyntaxException {
+		
+	}
+	
+	private void Elem() throws SyntaxException {
+		
+	}
+	
+	private void thing() throws SyntaxException {
+		
+	}
+	
+	private void factor() throws SyntaxException {
+		
+	}
+	
+	private void relOp() {
+		
+	}
+	
+	private void weakOP() throws SyntaxException {
+		
+	}
+	
+	private void strongOp() throws SyntaxException {
+		
+	}
+	
+	private void veryStrongOp() throws SyntaxException {
+		
+	}
 }
