@@ -351,6 +351,112 @@ public class TestSimpleParser {
 		parseCorrectInput(input);
 	}
 	
+	@Test
+	public void WhileC() throws SyntaxException {
+		System.out.println("WhileC");
+		String input = "import A.B; class A {while*(a){ a=b;} } ";
+		System.out.println(input);
+		//parseIncorrectInput(input,Kind.ASSIGN);	
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void print() throws  SyntaxException {
+		System.out.println("print");
+		String input = "import A.B; class A {print\"Hello\";}";
+		System.out.println(input);
+		//parseIncorrectInput(input,Kind.ASSIGN);	
+		parseCorrectInput(input);
+	}
 	
+	@Test
+	public void mod() throws  SyntaxException {
+		System.out.println("Mod");
+		String input = "import A.B; class A {%abc;}";
+		System.out.println(input);
+		//parseIncorrectInput(input,Kind.ASSIGN);	
+		parseCorrectInput(input);
+	}
+	
+	@Test
+	public void testreturn() throws  SyntaxException {
+		System.out.println("WhileC");
+		String input = "import A.B; class A {return true; return hello; return a+b;}";
+		System.out.println(input);
+		//parseIncorrectInput(input,Kind.ASSIGN);	
+		parseCorrectInput(input);
+	}
+	
+	@Test
+	public void Empty() throws SyntaxException {
+		System.out.println("Empty");
+		String input = " ";
+		System.out.println(input);
+		parseIncorrectInput(input,EOF);
+	}
+	
+	@Test
+	public void WrongAllowableInput1() throws SyntaxException {
+		System.out.println("WrongAllowableInput");
+		String input = "import java.lang.java; class A{a=true+false;} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void WrongAllowableInput2() throws SyntaxException {
+		System.out.println("WrongAllowableInput");
+		String input = "import java.lang.java; class A{b=true+\"HELLO\";} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void WrongAllowableInput3() throws SyntaxException {
+		System.out.println("WrongAllowableInput");
+		String input = "import java.lang.java; class A{a[true]=true;} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void RelOp1() throws SyntaxException {
+		System.out.println("RelOp");
+		String input = "import java.lang.java; class A{while(a==b){}if(a!=b){}else{}if(a|b){}} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void RelOp2() throws SyntaxException {
+		System.out.println("WrongAllowableInput");
+		String input = "import java.lang.java; class A{while(a&b){}if(a<b){}else{}if(a>b){}if(a<b){}if(a>=b){}if(a<=b){}}";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void RelOp3() throws SyntaxException {
+		System.out.println("RelOp");
+		String input = "import java.lang.java; class A{print a==b} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+
+	@Test
+	public void RelOp4() throws SyntaxException {
+		System.out.println("RelOp");
+		String input = "import java.lang.java; class A{return a==b} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
+	
+	@Test
+	public void RelOp5() throws SyntaxException {
+		System.out.println("RelOp");
+		String input = "import java.lang.java; class A{%a==b} ";
+		System.out.println(input);
+		parseCorrectInput(input);
+	}
 	
 }

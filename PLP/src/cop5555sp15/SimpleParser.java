@@ -187,7 +187,9 @@ public class SimpleParser {
 				match(SEMICOLON);
 			} else if (isKind(PREDICT_STATEMENT)) {
 				statement();
-				match(SEMICOLON);
+				if(isKind(SEMICOLON)) {
+					match(SEMICOLON);
+				}
 			} else {
 				throw new SyntaxException(t,
 						"expected one of  STATEMENT or DEF");
