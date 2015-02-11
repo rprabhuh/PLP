@@ -32,7 +32,7 @@ public class TestSimpleParser {
 		System.out.println(stream);
 		SimpleParser parser = new SimpleParser(stream);
 		parser.parse();
-	}	
+	}
 
 
 	/**This is an example of testing correct input
@@ -250,7 +250,7 @@ public class TestSimpleParser {
 		String input = "class A  {\n if (x) {};  \n if (y){} else {}; \n if (x) {} else {if (z) {} else {};} ; } ";
 		System.out.println(input);
 		parseCorrectInput(input);
-	} 
+	}
 	
 	@Test
 	public void emptyStatement()throws SyntaxException {
