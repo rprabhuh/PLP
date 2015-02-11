@@ -3,6 +3,7 @@ package cop5555sp15;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
 import cop5555sp15.SimpleParser.SyntaxException;
 import cop5555sp15.TokenStream.Kind;
 import static cop5555sp15.TokenStream.Kind.*;
@@ -299,4 +300,57 @@ public class TestSimpleParser {
 		System.out.println(input);
 		parseCorrectInput(input);
 	} 	
+	
+	@Test
+	public void NoClass() throws SyntaxException {
+		System.out.println("No Class");
+		String input = "import A { ] ";
+		System.out.println(input);
+		parseIncorrectInput(input,Kind.LCURLY);		
+	}
+	
+	
+	@Test
+	public void MissingSemi() throws SyntaxException {
+		System.out.println("Missing Semi");
+		String input = "import A class { } ";
+		System.out.println(input);
+		parseIncorrectInput(input,Kind.KW_CLASS);		
+	}
+	
+	@Test
+	public void DoubleDot() throws SyntaxException {
+		System.out.println("Double Dot");
+		String input = "import A..B; class { } ";
+		System.out.println(input);
+		parseIncorrectInput(input,Kind.RANGE);		
+	}
+	
+	@Test
+	public void VardecI() throws SyntaxException {
+		System.out.println("VarDecIncorrect");
+		String input = "import A.B; class A { def Hi:;} ";
+		System.out.println(input);
+		parseIncorrectInput(input,Kind.SEMICOLON);		
+	}
+	
+	@Test
+	public void ClosureDecI() throws SyntaxException {
+		System.out.println("ClosureDecI");
+		String input = "import A.B; class A { def Hi:int=3;} ";
+		System.out.println(input);
+		parseIncorrectInput(input,Kind.ASSIGN);		
+	}
+	
+	@Test
+	public void ClosureDecC() throws SyntaxException {
+		System.out.println("ClosureDecC");
+		String input = "import A.B; class A { def a={->b=3};} ";
+		System.out.println(input);
+		//parseIncorrectInput(input,Kind.ASSIGN);	
+		parseCorrectInput(input);
+	}
+	
+	
+	
 }

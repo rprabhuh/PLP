@@ -285,7 +285,9 @@ public class SimpleParser {
 		match(ARROW);
 		while (isKind(PREDICT_STATEMENT)) {
 			statement();
-			match(SEMICOLON);
+			if(isKind(SEMICOLON)) {
+				match(SEMICOLON);
+			}
 		}
 		match(RCURLY);
 	}
