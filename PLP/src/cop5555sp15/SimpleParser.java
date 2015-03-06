@@ -184,10 +184,15 @@ public class SimpleParser {
 		while (isKind(KW_DEF) || isKind(PREDICT_STATEMENT)) {
 			if (isKind(KW_DEF)) {
 				Declaration();
-				match(SEMICOLON);
+				if (isKind(RCURLY)) {
+					throw new SyntaxException(t,
+							"expected one of  STATEMENT or DEF");
+				} else if (isKind(SEMICOLON)) {
+					match(SEMICOLON);
+				}
 			} else if (isKind(PREDICT_STATEMENT)) {
 				statement();
-				if(isKind(SEMICOLON)) {
+				if (isKind(SEMICOLON)) {
 					match(SEMICOLON);
 				}
 			} else {
@@ -217,7 +222,9 @@ public class SimpleParser {
 	}
 
 	private void varDec() throws SyntaxException {
-		if (isKind(SEMICOLON)) {
+		if (isKind(IDENT)) {
+			match(IDENT);
+		} else if (isKind(SEMICOLON)) {
 			match(SEMICOLON);
 		} else if (isKind(COLON)) {
 			match(COLON);
@@ -287,7 +294,7 @@ public class SimpleParser {
 		match(ARROW);
 		while (isKind(PREDICT_STATEMENT)) {
 			statement();
-			if(isKind(SEMICOLON)) {
+			if (isKind(SEMICOLON)) {
 				match(SEMICOLON);
 			}
 		}
@@ -401,7 +408,7 @@ public class SimpleParser {
 	}
 
 	private void rangeExpression() throws SyntaxException {
-		//Expression();
+		// Expression();
 		match(RANGE);
 		Expression();
 	}

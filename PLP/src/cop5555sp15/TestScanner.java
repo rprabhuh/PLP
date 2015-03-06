@@ -604,7 +604,7 @@ public class TestScanner {
 		assertArrayEquals(expectedKinds, makeKindArray(stream));
 		assertArrayEquals(expectedTexts, makeTokenTextArray(stream));
 	}
-	
+
 	@Test
 	public void keywords3() {
 		System.out.println("keywords2");

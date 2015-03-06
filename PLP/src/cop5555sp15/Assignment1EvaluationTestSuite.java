@@ -11,7 +11,7 @@ import cop5555sp15.TokenStream.Kind;
 import cop5555sp15.TokenStream.Token;
 import static cop5555sp15.TokenStream.Kind.*;
 
-public class AssignmentEvaluationTestSuite {
+public class Assignment1EvaluationTestSuite {
 
 	private TokenStream scanInput(String input) {
 		System.out.println(input);
