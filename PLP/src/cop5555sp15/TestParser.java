@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import cop5555sp15.Parser.SyntaxException;
+import cop5555sp15.TokenStream.Kind;
 import cop5555sp15.ast.ASTNode;
 import static cop5555sp15.TokenStream.Kind.*;
 
