@@ -16,6 +16,7 @@ public class Assignment2EvaluationTestSuite {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 
+	@SuppressWarnings("deprecation")
 	@Rule
 	public Timeout globalTimeout = new Timeout(1000);
 

@@ -357,7 +357,6 @@ public class SimpleParser {
 	}
 
 	private void closureEvalExpression() throws SyntaxException {
-		// match(IDENT);
 		match(LPAREN);
 		expressionList();
 		match(RPAREN);
@@ -408,7 +407,6 @@ public class SimpleParser {
 	}
 
 	private void rangeExpression() throws SyntaxException {
-		// Expression();
 		match(RANGE);
 		Expression();
 	}
