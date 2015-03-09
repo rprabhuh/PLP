@@ -28,10 +28,10 @@ public class TestParserErrorHandling {
 		ASTNode ast = parser.parse();
 		assertNull(ast);
 		List<SyntaxException> exceptions = parser.getExceptionList();
-		for (SyntaxException e : exceptions) {
+/*		for (SyntaxException e : exceptions) {
 			System.out.println(e.getMessage());
 		}
-		assertEquals(expectedIncorrectTokenKind.length, exceptions.size());
+*/		assertEquals(expectedIncorrectTokenKind.length, exceptions.size());
 		for (int i = 0; i < exceptions.size(); ++i) {
 			assertEquals(expectedIncorrectTokenKind[i],
 					exceptions.get(i).t.kind); // class is the incorrect token

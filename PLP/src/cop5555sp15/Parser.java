@@ -113,7 +113,16 @@ public class Parser {
 			consume();
 			return kind;
 		}
-		throw new SyntaxException(t, kind);
+		Token errorToken = t;
+		while (!isKind(SEMICOLON)) {
+			consume();
+			if (isKind(EOF)) {
+				//exceptionList.add(new SyntaxException(t, kind));
+				throw new SyntaxException(errorToken, kind);
+			}
+		}
+		exceptionList.add(new SyntaxException(t, kind));
+		return kind;
 	}
 
 	private Kind match(Kind... kinds) throws SyntaxException {
@@ -126,7 +135,16 @@ public class Parser {
 		for (Kind kind1 : kinds) {
 			sb.append(kind1).append(kind1).append(" ");
 		}
-		throw new SyntaxException(t, "expected one of " + sb.toString());
+		Token errorToken = t;
+		while (!isKind(SEMICOLON)) {
+			consume();
+			if (isKind(EOF)) {
+				//exceptionList.add(new SyntaxException(t, kind));
+				throw new SyntaxException(errorToken, kind);
+			}
+		}
+		exceptionList.add(new SyntaxException(errorToken, kind));
+		return kind;
 	}
 
 	private boolean isKind(Kind kind) {
@@ -171,7 +189,7 @@ public class Parser {
 	}
 
 	List<SyntaxException> getExceptionList() {
-		return null;
+		return exceptionList;
 	}
 
 	private Program Program() throws SyntaxException {
@@ -187,10 +205,13 @@ public class Parser {
 	}
 
 	private List<QualifiedName> ImportList() throws SyntaxException {
-		// TODO Fill this in
 		List<QualifiedName> implist = new ArrayList<QualifiedName>();
 		Token start = t;
 		while (!isKind(KW_CLASS)) {
+			if(isKind(EOF)) {
+				//exceptionList.add(new SyntaxException(t, KW_CLASS));
+				throw new SyntaxException(t, KW_CLASS);
+			}
 			String qnbuilder = new String();
 			match(KW_IMPORT);
 			qnbuilder += t.getText();
@@ -227,8 +248,18 @@ public class Parser {
 				if (e != null)
 					elems.add(e);
 				if (isKind(RCURLY)) {
-					throw new SyntaxException(t,
-							"expected one of  STATEMENT or DEF");
+					Token errorToken = t;
+					while (!isKind(SEMICOLON)) {
+						if (isKind(EOF)) {
+							//exceptionList.add(new SyntaxException(t,
+							//		"expected one of  STATEMENT or DEF"));
+							throw new SyntaxException(errorToken, RCURLY);
+//									"expected one of  STATEMENT or DEF");
+						}
+						consume();
+					}
+					exceptionList.add(new SyntaxException(errorToken,
+							"expected one of  STATEMENT or DEF"));
 				} else if (isKind(SEMICOLON)) {
 					match(SEMICOLON);
 				}
@@ -240,8 +271,18 @@ public class Parser {
 					match(SEMICOLON);
 				}
 			} else {
-				throw new SyntaxException(t,
-						"expected one of  STATEMENT or DEF");
+				Token errorToken = t;
+				while (!isKind(SEMICOLON)) {
+					consume();
+					if (isKind(EOF)) {
+						//exceptionList.add(new SyntaxException(t,
+						//		"expected one of  STATEMENT or DEF"));
+						throw new SyntaxException(errorToken,
+								"expected one of  STATEMENT or DEF");
+					}
+				}
+				exceptionList.add(new SyntaxException(errorToken,
+						"expected one of  STATEMENT or DEF"));
 			}
 		}
 		match(RCURLY);
@@ -263,11 +304,32 @@ public class Parser {
 				Declaration d = closureDec(decStart, identStart);
 				return d;
 			} else {
-				throw new SyntaxException(t, "expected one of  " + COLON + "or"
-						+ ASSIGN);
+				Kind[] exp = { COLON, ASSIGN };
+				Token errorToken = t;
+				while (!isKind(SEMICOLON)) {
+					consume();
+					if (isKind(EOF)) {
+						//exceptionList.add(new SyntaxException(t, exp));
+						throw new SyntaxException(errorToken, exp);
+					} else if (isKind(RCURLY)) {
+						exceptionList.add(new SyntaxException(errorToken, exp));
+						return null;
+					}
+				}
+				exceptionList.add(new SyntaxException(errorToken, exp));
+				return null;
 			}
 		} else {
-			throw new SyntaxException(t, "expected " + IDENT);
+			Token errorToken = t;
+			while (!isKind(SEMICOLON)) {
+				consume();
+				if (isKind(EOF)) {
+					//exceptionList.add(new SyntaxException(t,IDENT));
+					throw new SyntaxException(errorToken, IDENT);
+				}
+			}
+			exceptionList.add(new SyntaxException(errorToken, IDENT));
+			return null;
 		}
 	}
 
@@ -281,8 +343,17 @@ public class Parser {
 			match(COLON);
 			ty = Type();
 		} else {
-			throw new SyntaxException(t, "expected one of  " + COLON + "or"
-					+ SEMICOLON);
+			Kind []exp = {COLON,SEMICOLON};
+			Token errorToken = t;
+			while (!isKind(SEMICOLON)) {
+				consume();
+				if (isKind(EOF)) {
+					//exceptionList.add(new SyntaxException(t,exp));
+					throw new SyntaxException(errorToken, exp);
+				}
+			}
+			exceptionList.add(new SyntaxException(errorToken, exp));
+			return null;
 		}
 		VarDec v = new VarDec(decStart, identStart, ty);
 		return v;
@@ -308,8 +379,20 @@ public class Parser {
 				ty = listType();
 			}
 		} else {
-			throw new SyntaxException(t,
-					"expected one of  SimpleType, List or KeyValue");
+			Token errorToken = t;
+			while (!isKind(SEMICOLON)) {
+				consume();
+				if (isKind(EOF)) {
+					//exceptionList.add(new SyntaxException(t,
+					//		"expected one of  SimpleType, List or KeyValue"));
+					throw new SyntaxException(errorToken,
+							"expected one of  SimpleType, List or KeyValue");
+				}
+			}
+			exceptionList.add(new SyntaxException(errorToken,
+					"expected one of  SimpleType, List or KeyValue"));
+
+			return null;
 		}
 		return ty;
 	}
@@ -326,8 +409,17 @@ public class Parser {
 			consume();
 			sty = new cop5555sp15.ast.SimpleType(typeStart, typeStart);
 		} else {
-			throw new SyntaxException(t, "expected one of  " + KW_INT + "or"
-					+ "or" + KW_BOOLEAN + "or" + KW_STRING);
+			Kind []exp = {KW_BOOLEAN,KW_STRING,KW_INT};
+			Token errorToken = t;
+			while (!isKind(SEMICOLON)) {
+				consume();
+				if (isKind(EOF)) {
+					//exceptionList.add(new SyntaxException(t,exp));
+					throw new SyntaxException(errorToken, exp);
+				}
+			}
+			exceptionList.add(new SyntaxException(errorToken, exp));
+			return null;
 		}
 		return sty;
 	}
@@ -689,8 +781,17 @@ public class Parser {
 				Expression lE = list();
 				return lE;
 			} else {
-				throw new SyntaxException(t, "expected one of  " + AT + "or"
-						+ LSQUARE);
+				Kind []exp={AT,LSQUARE};
+				Token errorToken = t;
+				while (!isKind(SEMICOLON)) {
+					consume();
+					if (isKind(EOF)) {
+						//exceptionList.add(new SyntaxException(t,exp));
+						throw new SyntaxException(errorToken, exp);
+					}
+				}
+				exceptionList.add(new SyntaxException(errorToken, exp));
+				return null;
 			}
 		} else if (isKind(LCURLY)) {
 			Token firstToken = t;
@@ -698,7 +799,16 @@ public class Parser {
 			ClosureExpression clE = new ClosureExpression(firstToken, cl);
 			return clE;
 		} else {
-			throw new SyntaxException(t, "expected factor");
+			Token errorToken = t;
+			while (!isKind(SEMICOLON)) {
+				consume();
+				if (isKind(EOF)) {
+					//exceptionList.add(new SyntaxException(t, "Expected factor, found EOF"));
+					throw new SyntaxException(errorToken, "Expected factor, found EOF ");
+				}
+			}
+			exceptionList.add(new SyntaxException(errorToken, "Expected factor"));
+			return null;
 		}
 	}
 
