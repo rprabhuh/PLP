@@ -1,6 +1,7 @@
 package cop5555sp15.ast;
 
 import org.objectweb.asm.*;
+
 import cop5555sp15.TokenStream.Kind;
 import cop5555sp15.TypeConstants;
 
@@ -40,8 +41,218 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	@Override
 	public Object visitBinaryExpression(BinaryExpression binaryExpression,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv;
+		// MethodVisitor mv = ((Argument) arg).mv;
+		Kind op = binaryExpression.op.kind;
+		switch (op) {
+		case AND: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			mv.visitJumpInsn(IFEQ, l1);
+			binaryExpression.expression1.visit(this, arg);
+			mv.visitJumpInsn(IFEQ, l1);
+			mv.visitInsn(ICONST_1);
+			Label l2 = new Label();
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_0);
+			mv.visitLabel(l2);
+		}
+			break;
+		case BAR: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			mv.visitJumpInsn(IFNE, l1);
+			binaryExpression.expression1.visit(this, arg);
+			mv.visitJumpInsn(IFNE, l1);
+			mv.visitInsn(ICONST_0);
+			Label l2 = new Label();
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_1);
+			mv.visitLabel(l2);
+		}
+			break;
+		case PLUS: {
+			if (binaryExpression.expression0.getType() == intType) {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				mv.visitLabel(l1);
+				binaryExpression.expression1.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitLabel(l2);
+				mv.visitInsn(IADD);
+			} else {
+				// Do string concatenation here
+			}
+		}
+			break;
+		case MINUS: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			mv.visitLabel(l1);
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitLabel(l2);
+			mv.visitInsn(ISUB);
+		}
+			break;
+		case TIMES: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			mv.visitLabel(l1);
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitLabel(l2);
+			mv.visitInsn(IMUL);
+		}
+			break;
+		case DIV: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			mv.visitLabel(l1);
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitLabel(l2);
+			mv.visitInsn(IDIV);
+		}
+			break;
+		case EQUAL: {
+			if (binaryExpression.expression0.getType() == intType) {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ICMPNE, l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitLabel(l2);
+
+			} else if (binaryExpression.expression0.getType() == booleanType) {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ICMPNE, l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitLabel(l2);
+
+			} else {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ACMPNE, l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitLabel(l2);
+				
+			}
+		}
+			break;
+		case NOTEQUAL: {
+			if (binaryExpression.expression0.getType() == intType) {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ICMPNE, l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitLabel(l2);
+
+			} else if (binaryExpression.expression0.getType() == booleanType) {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ICMPNE, l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitLabel(l2);
+
+			} else {
+				binaryExpression.expression0.visit(this, arg);
+				Label l1 = new Label();
+				binaryExpression.expression0.visit(this, arg);
+				Label l2 = new Label();
+				mv.visitJumpInsn(IF_ACMPNE, l1);
+				mv.visitInsn(ICONST_0);
+				mv.visitJumpInsn(GOTO, l2);
+				mv.visitLabel(l1);
+				mv.visitInsn(ICONST_1);
+				mv.visitLabel(l2);
+
+			}
+		}
+			break;
+		case LE: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitJumpInsn(IF_ICMPLE, l1);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_1);
+			mv.visitLabel(l2);
+			
+			
+		}
+			break;
+		case LT: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitJumpInsn(IF_ICMPLT, l1);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_1);
+			mv.visitLabel(l2);
+		}
+			break;
+		case GE: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitJumpInsn(IF_ICMPGE, l1);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_1);
+			mv.visitLabel(l2);
+		}
+			break;
+		case GT: {
+			binaryExpression.expression0.visit(this, arg);
+			Label l1 = new Label();
+			binaryExpression.expression1.visit(this, arg);
+			Label l2 = new Label();
+			mv.visitJumpInsn(IF_ICMPGT, l1);
+			mv.visitInsn(ICONST_0);
+			mv.visitJumpInsn(GOTO, l2);
+			mv.visitLabel(l1);
+			mv.visitInsn(ICONST_1);
+			mv.visitLabel(l2);
+		}
+			break;
+		}
+		return null;
 	}
 
 	@Override
@@ -56,8 +267,14 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	public Object visitBooleanLitExpression(
 			BooleanLitExpression booleanLitExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv; // this should be the
+		// first statement
+		// of all visit
+		// methods that
+		// generate
+		// instructions
+		mv.visitLdcInsn(booleanLitExpression.value);
+		return null;
 	}
 
 	@Override
@@ -259,7 +476,8 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 																	// method
 				"()V", // descriptor: this method is parameterless with no
 						// return value
-				null, // signature.  This is null for us, it has to do with generic types
+				null, // signature. This is null for us, it has to do with
+						// generic types
 				null // array of strings containing exceptions
 				);
 		mv.visitCode();
@@ -271,12 +489,11 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		Label lend = new Label();
 		mv.visitLabel(lend);
 		mv.visitLocalVariable("this", classDescriptor, null, lbeg, lend, 0);
-		mv.visitMaxs(0, 0);  //this is required just before the end of a method. 
-		                     //It causes asm to calculate information about the
-		                     //stack usage of this method.
+		mv.visitMaxs(0, 0); // this is required just before the end of a method.
+							// It causes asm to calculate information about the
+							// stack usage of this method.
 		mv.visitEnd();
 
-		
 		cw.visitEnd();
 		return cw.toByteArray();
 	}
@@ -319,8 +536,14 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	public Object visitStringLitExpression(
 			StringLitExpression stringLitExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv; // this should be the
+		// first statement
+		// of all visit
+		// methods that
+		// generate
+		// instructions
+		mv.visitLdcInsn(stringLitExpression.toString());
+		return null;
 	}
 
 	@Override

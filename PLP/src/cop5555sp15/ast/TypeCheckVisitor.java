@@ -1,5 +1,6 @@
 package cop5555sp15.ast;
 
+import cop5555sp15.TokenStream.Kind;
 import cop5555sp15.TypeConstants;
 import cop5555sp15.symbolTable.SymbolTable;
 
@@ -44,7 +45,62 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitBinaryExpression(BinaryExpression binaryExpression,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		// check(false,"Type mismatch in binary epresssion",binaryExpression);
+		binaryExpression.expression0.visit(this, arg);
+		binaryExpression.expression1.visit(this, arg);
+		if (binaryExpression.expression0.getType() != binaryExpression.expression1
+				.getType()) {
+			throw new TypeCheckException(
+					"Type mis-match in binary expression.", binaryExpression);
+		}
+		Kind operator = binaryExpression.op.kind;
+		if (binaryExpression.expression0.getType() == intType) {
+			switch (operator) {
+			case DIV:
+			case MINUS:
+			case PLUS:
+			case TIMES:
+				binaryExpression.setType(intType);
+				return intType;
+			case GT:
+			case LT:
+			case LE:
+			case GE:
+			case EQUAL:
+			case NOTEQUAL:
+				binaryExpression.setType(booleanType);
+				return booleanType;
+			default:
+				throw new TypeCheckException("Invalid Operator for type"
+						+ binaryExpression.expression0.getType(),
+						binaryExpression);
+			}
+		} else if (binaryExpression.expression0.getType() == stringType) {
+			if (operator == Kind.PLUS) {
+				binaryExpression.setType(stringType);
+				return stringType;
+			} else if (operator == Kind.EQUAL || operator == Kind.NOTEQUAL) {
+				binaryExpression.setType(booleanType);
+				return booleanType;
+			} else {
+				throw new TypeCheckException("Invalid Operator for type "
+						+ binaryExpression.expression0.getType(),
+						binaryExpression);
+			}
+		} else if (binaryExpression.expression0.getType() == booleanType) {
+			if (operator == Kind.EQUAL || operator == Kind.NOTEQUAL || operator == Kind.BAR || operator == Kind.AND) {
+				binaryExpression.setType(booleanType);
+				return booleanType;
+			} else {
+				throw new TypeCheckException("Invalid Operator for type "
+						+ binaryExpression.expression0.getType(),
+						binaryExpression);
+			}
+		} else {
+			throw new TypeCheckException("Unknown Operand Type",
+					binaryExpression);
+		}
+
 	}
 
 	/**
@@ -76,7 +132,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	public Object visitBooleanLitExpression(
 			BooleanLitExpression booleanLitExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		booleanLitExpression.setType(booleanType);
+		return booleanType;
 	}
 
 	/**
@@ -286,7 +343,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	public Object visitStringLitExpression(
 			StringLitExpression stringLitExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		stringLitExpression.setType(stringType);
+		return stringType;
 	}
 
 	/**
