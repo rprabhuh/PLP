@@ -36,7 +36,21 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	public Object visitAssignmentStatement(
 			AssignmentStatement assignmentStatement, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		VarDec d = (VarDec) symbolTable
+				.lookup(assignmentStatement.lvalue.firstToken.getText());
+		if (d == null) {
+			throw new TypeCheckException("Using variable before declaration",
+					assignmentStatement);
+		}
+		assignmentStatement.lvalue.setType(d.type.getJVMType());
+		assignmentStatement.expression.visit(this, arg);
+		if (assignmentStatement.lvalue.type == assignmentStatement.expression.expressionType) {
+			return assignmentStatement.lvalue.type;
+		} else {
+			throw new TypeCheckException(
+					"Type mis-match in assignment statement.",
+					assignmentStatement);
+		}
 	}
 
 	/**
@@ -45,7 +59,6 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitBinaryExpression(BinaryExpression binaryExpression,
 			Object arg) throws Exception {
-		// check(false,"Type mismatch in binary epresssion",binaryExpression);
 		binaryExpression.expression0.visit(this, arg);
 		binaryExpression.expression1.visit(this, arg);
 		if (binaryExpression.expression0.getType() != binaryExpression.expression1
@@ -88,7 +101,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 						binaryExpression);
 			}
 		} else if (binaryExpression.expression0.getType() == booleanType) {
-			if (operator == Kind.EQUAL || operator == Kind.NOTEQUAL || operator == Kind.BAR || operator == Kind.AND) {
+			if (operator == Kind.EQUAL || operator == Kind.NOTEQUAL
+					|| operator == Kind.BAR || operator == Kind.AND) {
 				binaryExpression.setType(booleanType);
 				return booleanType;
 			} else {
@@ -180,7 +194,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitExpressionLValue(ExpressionLValue expressionLValue,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		expressionLValue.type = expressionLValue.expression.getType();
+		return expressionLValue.type;
 	}
 
 	@Override
@@ -198,7 +213,15 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitIdentExpression(IdentExpression identExpression,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		VarDec d = (VarDec) symbolTable.lookup(identExpression.identToken
+				.getText());
+		if (d == null) {
+			throw new TypeCheckException("The variable hasn't been declared",
+					identExpression);
+		} else {
+			identExpression.setType(d.type.getJVMType());
+		}
+		return identExpression.getType();
 	}
 
 	@Override
@@ -330,7 +353,7 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitSimpleType(SimpleType simpleType, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		return simpleType.type.getText();
 	}
 
 	@Override
@@ -374,7 +397,15 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	 */
 	@Override
 	public Object visitVarDec(VarDec varDec, Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		Declaration d = symbolTable.lookup(varDec.identToken.getText());
+		if (d != null) {
+			throw new TypeCheckException(
+					"Redeclaration of variable in function", varDec);
+		} else {
+			symbolTable.insert(varDec.identToken.getText(), varDec);
+		}
+
+		return varDec.type.getJVMType();
 	}
 
 	/**
