@@ -46,6 +46,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 		assignmentStatement.expression.visit(this, arg);
 		if (assignmentStatement.lvalue.type == assignmentStatement.expression.expressionType) {
 			return assignmentStatement.lvalue.type;
+		} else if(assignmentStatement.expression.expressionType == null){
+			return "Ljava/util/ArrayList;";
 		} else {
 			throw new TypeCheckException(
 					"Type mis-match in assignment statement.",
@@ -233,7 +235,17 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitIfElseStatement(IfElseStatement ifElseStatement,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		//throw new UnsupportedOperationException("not yet implemented");
+		ifElseStatement.expression.visit(this, arg);
+		if(ifElseStatement.expression.getType() == booleanType) {
+			ifElseStatement.ifBlock.visit(this, arg);
+			ifElseStatement.elseBlock.visit(this, arg);
+			return null;
+		} else {
+			throw new TypeCheckException("Expected boolean expression",
+					ifElseStatement);
+		}
+		
 	}
 
 	/**
@@ -242,7 +254,15 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitIfStatement(IfStatement ifStatement, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		//throw new UnsupportedOperationException("not yet implemented");
+		ifStatement.expression.visit(this, arg);
+		if(ifStatement.expression.getType() == booleanType) {
+			ifStatement.block.visit(this, arg);
+			return null;
+		} else {
+			throw new TypeCheckException("Expected boolean expression",
+					ifStatement);
+		}
 	}
 
 	/**
@@ -281,7 +301,21 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitListExpression(ListExpression listExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		
+		String temp = null, temp1 = null;
+		for(Expression expr: listExpression.expressionList) {
+			if(expr==null){
+				return "Ljava/util/ArrayList;";
+			}
+			expr.visit(this, arg);
+			temp = expr.getType();
+			if(temp!=temp1 && temp1 != null) {
+				throw new TypeCheckException("Type mis-match in List Type", listExpression);
+			}
+			temp1 = temp;
+		}
+		listExpression.setType(temp);
+		return temp;
 	}
 
 	/** gets the type from the enclosed expression */
@@ -294,7 +328,8 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 
 	@Override
 	public Object visitListType(ListType listType, Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		listType.type.visit(this, arg);
+		return listType.type.getJVMType();
 	}
 
 	@Override
@@ -376,7 +411,16 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitUnaryExpression(UnaryExpression unaryExpression,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		unaryExpression.expression.visit(this, arg);
+		if(unaryExpression.expression.getType() == intType && unaryExpression.op.kind == Kind.MINUS) {
+			unaryExpression.setType(intType);
+			return intType;
+		} else if(unaryExpression.expression.getType() == booleanType && unaryExpression.op.kind == Kind.NOT){
+			unaryExpression.setType(booleanType);
+			return booleanType;
+		} else {
+			throw new UnsupportedOperationException("not yet implemented");
+		}
 	}
 
 	@Override
@@ -397,6 +441,7 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	 */
 	@Override
 	public Object visitVarDec(VarDec varDec, Object arg) throws Exception {
+		varDec.type.visit(this, arg);
 		Declaration d = symbolTable.lookup(varDec.identToken.getText());
 		if (d != null) {
 			throw new TypeCheckException(
@@ -429,7 +474,15 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 	@Override
 	public Object visitWhileStatement(WhileStatement whileStatement, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException("not yet implemented");
+		whileStatement.expression.visit(this, arg);
+		if(whileStatement.expression.getType() == booleanType) {
+			whileStatement.block.visit(this, arg);
+			return null;
+		} else {
+			throw new TypeCheckException("Expected boolean expression",
+					whileStatement);
+		}
+		
 	}
 
 }

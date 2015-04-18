@@ -799,7 +799,7 @@ public class Parser {
 			ClosureExpression clE = new ClosureExpression(firstToken, cl);
 			return clE;
 		} else {
-			Token errorToken = t;
+		/*	Token errorToken = t;
 			while (!isKind(SEMICOLON)) {
 				consume();
 				if (isKind(EOF)) {
@@ -807,7 +807,7 @@ public class Parser {
 					throw new SyntaxException(errorToken, "Expected factor, found EOF ");
 				}
 			}
-			exceptionList.add(new SyntaxException(errorToken, "Expected factor"));
+			exceptionList.add(new SyntaxException(errorToken, "Expected factor"));*/
 			return null;
 		}
 	}
