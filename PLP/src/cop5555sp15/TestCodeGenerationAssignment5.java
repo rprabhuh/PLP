@@ -51,7 +51,7 @@ public class TestCodeGenerationAssignment5 {
 		System.out.println();
 		ASTNode ast = parser.parse();
 		if (ast == null) {
-			System.out.println("errors " + parser.getExceptionList());
+			System.out.println("errors " + parser.getErrors());
 		}
 		assertNotNull(ast);
 		return ast;

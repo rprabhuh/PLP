@@ -812,4 +812,9 @@ public class Parser {
 		}
 	}
 
+	public String getErrors() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

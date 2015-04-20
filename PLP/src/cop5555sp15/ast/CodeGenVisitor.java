@@ -35,13 +35,41 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			AssignmentStatement assignmentStatement, Object arg)
 			throws Exception {
 		MethodVisitor mv = ((InheritedAttributes) arg).mv;
+		// assignmentStatement.lvalue.visit(this, arg);
 		mv.visitVarInsn(ALOAD, 0);
-		assignmentStatement.expression.visit(this, arg);
-		mv.visitFieldInsn(PUTFIELD, className,
-				assignmentStatement.lvalue.firstToken.getText(),
-				assignmentStatement.lvalue.getType());
-		return null;
+		if (assignmentStatement.lvalue.visit(this, arg) == null) {
 
+			if (assignmentStatement.lvalue.getType().contains("List")) {
+				assignmentStatement.expression.visit(this, arg);
+				mv.visitFieldInsn(PUTFIELD, className,
+						assignmentStatement.lvalue.firstToken.getText(),
+						"Ljava/util/ArrayList;");
+				return null;
+			} else {
+				assignmentStatement.expression.visit(this, arg);
+				mv.visitFieldInsn(PUTFIELD, className,
+						assignmentStatement.lvalue.firstToken.getText(),
+						assignmentStatement.lvalue.getType());
+				return null;
+
+			}
+			// return intType;
+		} else {
+			assignmentStatement.expression.visit(this, arg);
+			switch (assignmentStatement.expression.getType()) {
+			case intType:
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
+						"valueOf", "(I)Ljava/lang/Integer;");
+				break;
+			case booleanType:
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean",
+						"valueOf", "(Z)Ljava/lang/Boolean;",false);
+			}
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "set",
+					"(ILjava/lang/Object;)Ljava/lang/Object;", false);
+			mv.visitInsn(POP);
+		}
+		return null;
 	}
 
 	@Override
@@ -137,7 +165,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			if (binaryExpression.expression0.getType() == intType) {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ICMPNE, l1);
 				mv.visitInsn(ICONST_1);
@@ -149,7 +177,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			} else if (binaryExpression.expression0.getType() == booleanType) {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ICMPNE, l1);
 				mv.visitInsn(ICONST_1);
@@ -161,7 +189,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			} else {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ACMPNE, l1);
 				mv.visitInsn(ICONST_1);
@@ -177,7 +205,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			if (binaryExpression.expression0.getType() == intType) {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ICMPNE, l1);
 				mv.visitInsn(ICONST_0);
@@ -189,7 +217,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			} else if (binaryExpression.expression0.getType() == booleanType) {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ICMPNE, l1);
 				mv.visitInsn(ICONST_0);
@@ -201,7 +229,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			} else {
 				binaryExpression.expression0.visit(this, arg);
 				Label l1 = new Label();
-				binaryExpression.expression0.visit(this, arg);
+				binaryExpression.expression1.visit(this, arg);
 				Label l2 = new Label();
 				mv.visitJumpInsn(IF_ACMPNE, l1);
 				mv.visitInsn(ICONST_0);
@@ -323,8 +351,13 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	@Override
 	public Object visitExpressionLValue(ExpressionLValue expressionLValue,
 			Object arg) throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+	    MethodVisitor mv = ((InheritedAttributes) arg).mv;
+	    mv.visitFieldInsn(GETFIELD, className,
+	        expressionLValue.identToken.getText(), "Ljava/util/ArrayList;");
+
+	    expressionLValue.expression.visit(this, arg);
+	    return intType;
+	    
 	}
 
 	@Override
@@ -340,6 +373,16 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			Object arg) throws Exception {
 		MethodVisitor mv = ((InheritedAttributes) arg).mv;
 		mv.visitVarInsn(ALOAD, 0);
+		if (identExpression.getType().contains("List")) {
+			
+			  String Type[] = identExpression.getType().split("List"); String
+			  newclass = Type[0]+"ArrayList;"; 
+			  
+			  mv.visitFieldInsn(GETFIELD,
+			  className, identExpression.identToken.getText(), newclass);
+			 
+			return null;
+		}
 		mv.visitFieldInsn(GETFIELD, className,
 				identExpression.identToken.getText(), identExpression.getType());
 		return null;
@@ -348,8 +391,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	@Override
 	public Object visitIdentLValue(IdentLValue identLValue, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		return null;
 	}
 
 	@Override
@@ -421,16 +463,70 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	@Override
 	public Object visitListExpression(ListExpression listExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv;
+		mv.visitTypeInsn(NEW, "java/util/ArrayList");
+		mv.visitInsn(DUP);
+		mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>",
+				"()V");
+		for (Expression expr : listExpression.expressionList) {
+			if (expr == null) {
+				return null;
+			}
+			mv.visitInsn(DUP);
+			expr.visit(this, arg);
+			switch (expr.getType()) {
+			case intType:
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
+						"valueOf", "(I)Ljava/lang/Integer;");
+				break;
+			case booleanType:
+				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean",
+						"valueOf", "(Z)Ljava/lang/Boolean;");
+				break;
+			}
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "add",
+					"(Ljava/lang/Object;)Z");
+			mv.visitInsn(POP);
+		}
+		return null;
 	}
 
 	@Override
 	public Object visitListOrMapElemExpression(
 			ListOrMapElemExpression listOrMapElemExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv;
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, className,
+				listOrMapElemExpression.identToken.getText(),
+				"Ljava/util/ArrayList;");
+		listOrMapElemExpression.expression.visit(this, arg);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "get",
+				"(I)Ljava/lang/Object;", false);
+		switch (listOrMapElemExpression.expressionType) {
+		case "I":
+			mv.visitTypeInsn(CHECKCAST, "java/lang/Integer");
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue",
+					"()I");
+			listOrMapElemExpression.setType(intType);
+			return intType;
+		case "Z":
+			mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean");
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean",
+					"BooleanValue", "()Z");
+			listOrMapElemExpression.setType(booleanType);
+			
+			return booleanType;
+		case "Ljava/lang/String;":
+			mv.visitTypeInsn(CHECKCAST, "java/lang/String");
+			listOrMapElemExpression.setType(stringType);
+			
+			return stringType;
+		default:
+			mv.visitTypeInsn(CHECKCAST, "java/util/ArrayList");
+			return null;
+		}
+
 	}
 
 	@Override
@@ -564,8 +660,12 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	@Override
 	public Object visitSizeExpression(SizeExpression sizeExpression, Object arg)
 			throws Exception {
-		throw new UnsupportedOperationException(
-				"code generation not yet implemented");
+		MethodVisitor mv = ((InheritedAttributes) arg).mv;
+		sizeExpression.expression.visit(this, arg);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "size", "()I",
+				true);
+		sizeExpression.setType(intType);
+		return intType;
 	}
 
 	@Override
@@ -622,6 +722,14 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		System.out.println(varDec.identToken.getText());
 		System.out.println(varDec.type.getJVMType());
 
+		if (varDec.type.getJVMType().contains("List")) {
+			String Type[] = varDec.type.getJVMType().split("List");
+			String newclass = Type[0] + "ArrayList;";
+			fv = cw.visitField(0, varDec.identToken.getText(),
+					newclass, null, null);
+			fv.visitEnd();
+			return null;
+		}
 		fv = cw.visitField(0, varDec.identToken.getText(),
 				varDec.type.getJVMType(), null, null);
 
