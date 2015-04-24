@@ -59,7 +59,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			switch (assignmentStatement.expression.getType()) {
 			case intType:
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
-						"valueOf", "(I)Ljava/lang/Integer;");
+						"valueOf", "(I)Ljava/lang/Integer;",false);
 				break;
 			case booleanType:
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean",
@@ -76,7 +76,6 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 	public Object visitBinaryExpression(BinaryExpression binaryExpression,
 			Object arg) throws Exception {
 		MethodVisitor mv = ((InheritedAttributes) arg).mv;
-		// MethodVisitor mv = ((Argument) arg).mv;
 		Kind op = binaryExpression.op.kind;
 		switch (op) {
 		case AND: {
@@ -424,13 +423,13 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		MethodVisitor mv = ((InheritedAttributes) arg).mv;
 		ifElseStatement.expression.visit(this, arg);
 		Label l1 = new Label();
+		Label l2 = new Label();
+		
 		mv.visitJumpInsn(IFEQ, l1);
 		ifElseStatement.ifBlock.visit(this, arg);
-		mv.visitJumpInsn(GOTO, l1);
-		Label l2 = new Label();
+		mv.visitJumpInsn(GOTO, l2);
 		mv.visitLabel(l1);
 		ifElseStatement.elseBlock.visit(this, arg);
-		mv.visitJumpInsn(GOTO, l2);
 		mv.visitLabel(l2);
 		return null;
 	}
@@ -491,7 +490,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		mv.visitTypeInsn(NEW, "java/util/ArrayList");
 		mv.visitInsn(DUP);
 		mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>",
-				"()V");
+				"()V",false);
 		for (Expression expr : listExpression.expressionList) {
 			if (expr == null) {
 				return null;
@@ -501,15 +500,15 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			switch (expr.getType()) {
 			case intType:
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
-						"valueOf", "(I)Ljava/lang/Integer;");
+						"valueOf", "(I)Ljava/lang/Integer;",false);
 				break;
 			case booleanType:
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean",
-						"valueOf", "(Z)Ljava/lang/Boolean;");
+						"valueOf", "(Z)Ljava/lang/Boolean;",false);
 				break;
 			}
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "add",
-					"(Ljava/lang/Object;)Z");
+					"(Ljava/lang/Object;)Z",false);
 			mv.visitInsn(POP);
 		}
 		return null;
@@ -524,10 +523,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		mv.visitFieldInsn(GETFIELD, className,
 				listOrMapElemExpression.identToken.getText(),
 				"Ljava/util/ArrayList;");
-		/*
-		 * mv.visitInsn(DUP); mv.visitMethodInsn(INVOKEINTERFACE,
-		 * "java/util/List", "size", "()I", true); //mv.visitInsn(POP);
-		 */
+
 		listOrMapElemExpression.expression.visit(this, arg);
 
 		mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/ArrayList", "get",
@@ -536,13 +532,13 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 		case "I":
 			mv.visitTypeInsn(CHECKCAST, "java/lang/Integer");
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue",
-					"()I");
+					"()I",false);
 			listOrMapElemExpression.setType(intType);
 			return intType;
 		case "Z":
 			mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean");
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean",
-					"booleanValue", "()Z");
+					"booleanValue", "()Z",false);
 			listOrMapElemExpression.setType(booleanType);
 
 			return booleanType;
@@ -726,13 +722,11 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes, TypeConstants {
 			unaryExpression.expression.visit(this, arg);
 			Label l1 = new Label();
 			mv.visitJumpInsn(IFEQ, l1);
-			unaryExpression.expression.visit(this, arg);
-			mv.visitJumpInsn(IFEQ, l1);
 			mv.visitInsn(ICONST_0);
 			Label l2 = new Label();
 			mv.visitJumpInsn(GOTO, l2);
 			mv.visitLabel(l1);
-			mv.visitInsn(ICONST_0);
+			mv.visitInsn(ICONST_1);
 			mv.visitLabel(l2);
 			return null;
 		}

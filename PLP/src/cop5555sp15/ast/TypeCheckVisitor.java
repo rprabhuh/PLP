@@ -334,7 +334,6 @@ public class TypeCheckVisitor implements ASTVisitor, TypeConstants {
 			temp1 = temp;
 		}
 		listExpression.setType("Ljava/util/List<" + temp + ">;");
-		System.out.println(listExpression.getType());
 		return "Ljava/util/List<" + temp + ">;" ;
 	}
 
