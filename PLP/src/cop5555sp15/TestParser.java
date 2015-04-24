@@ -15,7 +15,7 @@ import static cop5555sp15.TokenStream.Kind.*;
 
 public class TestParser {
 
-	private ASTNode parseCorrectInput(String input) throws SyntaxException {
+	private ASTNode parseCorrectInput(String input)  {
 		TokenStream stream = new TokenStream(input);
 		Scanner scanner = new Scanner(stream);
 		scanner.scan();

@@ -173,7 +173,7 @@ public class Parser {
 	static final Kind[] PREDICT_STATEMENT = { IDENT, KW_PRINT, KW_WHILE, KW_IF,
 			MOD, KW_RETURN, SEMICOLON };
 
-	public Program parse() throws SyntaxException {
+	public Program parse() {
 		Program p = null;
 		try {
 			p = Program();
